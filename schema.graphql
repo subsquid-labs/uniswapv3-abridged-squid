@@ -1,0 +1,185 @@
+type Factory @entity {
+  # factory address
+  id: ID!
+}
+
+type Pool @entity {
+  # pool address
+  id: ID!
+  # creation
+  createdAtTimestamp: DateTime
+  createdAtBlockNumber: Int
+  # token0
+  token0Id: String
+  # token1
+  token1Id: String
+  # initial state
+  initialTick: Int
+  initialSqrtPriceX96: BigInt
+  # derived fields
+  mints: [Mint!]! @derivedFrom(field: "pool")
+  burns: [Burn!]! @derivedFrom(field: "pool")
+  swaps: [Swap!]! @derivedFrom(field: "pool")
+  collects: [Collect!]! @derivedFrom(field: "pool")
+}
+
+type Tx @entity {
+  # txn hash
+  id: ID!
+  # block txn was included in
+  blockNumber: Int!
+  # timestamp txn was confirmed
+  timestamp: DateTime!
+  # the itinerary
+  from: String!
+  to: String
+  # gas used during txn execution
+  gasUsed: BigInt!
+  gasPrice: BigInt!
+  # derived values
+  mints: [Mint]! @derivedFrom(field: "transaction")
+  burns: [Burn]! @derivedFrom(field: "transaction")
+  swaps: [Swap]! @derivedFrom(field: "transaction")
+  flashed: [Flash]! @derivedFrom(field: "transaction")
+  collects: [Collect]! @derivedFrom(field: "transaction")
+}
+
+type Mint @entity {
+  # parent transaction hash
+  id: ID!
+  # which txn the mint was included in
+  transaction: Tx!
+  # time of txn
+  timestamp: DateTime!
+  # pool position is within
+  poolAddress: String!
+  pool: Pool!
+  # owner of position where liquidity minted to
+  owner: String!
+  # the address that minted the liquidity
+  sender: String
+  # amount of liquidity minted
+  amount: BigInt!
+  # amount of token 0 minted
+  amount0: BigInt!
+  # amount of token 1 minted
+  amount1: BigInt!
+  # lower tick of the position
+  tickLower: Int!
+  # upper tick of the position
+  tickUpper: Int!
+  # txn origin
+  origin: String! # the EOA that initiated the txn
+  # order within the txn
+  logIndex: Int
+}
+
+type Burn @entity {
+  # parent transaction hash
+  id: ID!
+  # txn burn was included in
+  transaction: Tx!
+  # pool position is within
+  poolAddress: String!
+  pool: Pool!
+  # need this to pull recent txns for specific token or pool
+  timestamp: DateTime!
+  # owner of position where liquidity was burned
+  owner: String
+  # amouny of liquidity burned
+  amount: BigInt!
+  # amount of token 0 burned
+  amount0: BigInt!
+  # amount of token 1 burned
+  amount1: BigInt!
+  # lower tick of position
+  tickLower: Int!
+  # upper tick of position
+  tickUpper: Int!
+  # txn origin
+  origin: String! # the EOA that initiated the txn
+  # position within the transactions
+  logIndex: Int
+}
+
+type Swap @entity {
+  # parent transaction hash
+  id: ID!
+  # pointer to transaction
+  transaction: Tx!
+  # timestamp of transaction
+  timestamp: DateTime!
+  # pool swap occured within
+  poolAddress: String!
+  pool: Pool!
+  # sender of the swap
+  sender: String!
+  # recipient of the swap
+  recipient: String!
+  # delta of token0 swapped
+  amount0: BigInt!
+  # delta of token1 swapped
+  amount1: BigInt!
+  # The sqrt(price) of the pool after the swap, as a Q64.96
+  sqrtPriceX96: BigInt!
+  # liquidity after the swap
+  liquidity: BigInt!
+  # the tick after the swap
+  tick: Int!
+  # txn origin
+  origin: String! # the EOA that initiated the txn
+  # index within the txn
+  logIndex: Int
+}
+
+type Collect @entity {
+  # transaction hash + "#" + index in collect Transaction array
+  id: ID!
+  # pointer to txn
+  transactionHash: String!
+  transaction: Tx!
+  # timestamp of event
+  timestamp: DateTime!
+  # pool collect occured within
+  poolAddress: String!
+  pool: Pool!
+  # owner of position collect was performed on
+  owner: String
+  # amount of token0 collected
+  amount0: Float!
+  # amount of token1 collected
+  amount1: Float!
+  # lower tick of position
+  tickLower: Int!
+  # uppper tick of position
+  tickUpper: Int!
+  # index within the txn
+  logIndex: Int
+}
+
+type Flash @entity {
+  # transaction hash + "-" + index in collect Transaction array
+  id: ID!
+  # pointer to txn
+  transaction: Tx!
+  transactionHash: String!
+  # timestamp of event
+  timestamp: DateTime!
+  # pool collect occured within
+  poolAddress: String!
+  pool: Pool!
+  # sender of the flash
+  sender: String!
+  # recipient of the flash
+  recipient: String!
+  # amount of token0 flashed
+  amount0: Float!
+  # amount of token1 flashed
+  amount1: Float!
+  # amount token0 paid for flash
+  amount0Paid: Float!
+  # amount token1 paid for flash
+  amount1Paid: Float!
+  # index within the txn
+  logIndex: Int
+}
