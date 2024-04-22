@@ -52,7 +52,7 @@ export const processor = new EvmBatchProcessor()
       poolAbi.events.Initialize.topic,
       poolAbi.events.Swap.topic,
     ],
-    range: {from: preloadedPoolsMetadata.height+1},
+    range: {from: preloadedPoolsMetadata.height + 1},
     transaction: true,
   })
   .addLog({
