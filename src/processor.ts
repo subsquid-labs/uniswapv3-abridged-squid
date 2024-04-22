@@ -34,46 +34,7 @@ export const processor = new EvmBatchProcessor()
     topic0: [factoryAbi.events.PoolCreated.topic],
     transaction: true,
   })
-  .addLog({
-    address: preloadedPoolsMetadata.pools,
-    topic0: [
-      poolAbi.events.Burn.topic,
-      poolAbi.events.Mint.topic,
-      poolAbi.events.Initialize.topic,
-      poolAbi.events.Swap.topic,
-    ],
-    range: {from: FACTORY_DEPLOYED_AT, to: preloadedPoolsMetadata.height},
-    transaction: true,
-  })
-  .addLog({
-    topic0: [
-      poolAbi.events.Burn.topic,
-      poolAbi.events.Mint.topic,
-      poolAbi.events.Initialize.topic,
-      poolAbi.events.Swap.topic,
-    ],
-    range: {from: preloadedPoolsMetadata.height+1},
-    transaction: true,
-  })
-  .addLog({
-    address: [POSITIONS_ADDRESS],
-    topic0: [
-//      positionsAbi.events.IncreaseLiquidity.topic,
-//      positionsAbi.events.DecreaseLiquidity.topic,
-      positionsAbi.events.Collect.topic,
-//      positionsAbi.events.Transfer.topic,
-    ],
-    transaction: true,
-  })
   .setFields({
-    transaction: {
-      from: true,
-      to: true,
-      value: true,
-      hash: true,
-      gasUsed: true,
-      gasPrice: true,
-    },
     log: {
       topics: true,
       data: true,

@@ -40,7 +40,15 @@ async function handlePoolCreated(
   const deferredPool = mctx.store.defer(Pool, poolAddressLowerCase);
 
   mctx.queue.Pool.push(async () => {
-    const pool = await deferredPool.getOrInsert(createNewPool);
+    let pool = await deferredPool.get();
+    if (pool === undefined) {
+      console.log(`new pool ${poolAddressLowerCase} is unknown, adding it`)
+      pool = new Pool({id: poolAddressLowerCase});
+    }
+    else {
+      console.log(`known pool ${poolAddressLowerCase} created`)
+    }
+    // getOrInsert(createNewPool);
     pool.createdAtBlockNumber = blockHeader.height;
     pool.createdAtTimestamp = new Date(blockHeader.timestamp);
     pool.token0Id = token0;
