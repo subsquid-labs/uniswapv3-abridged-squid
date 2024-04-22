@@ -4,56 +4,61 @@ import {
   preloadedPoolsMetadata,
   processor,
 } from "./processor";
-import { processFactoryData } from "./mappings/factory";
-import { processPairsData } from "./mappings/core";
+import { handlePoolCreated } from "./mappings/factory";
+import { handleBurn, handleInitialize, handleMint, handleSwap } from "./mappings/core";
 //import { processPositions } from "./mappings/positionManager";
 import { Pool } from "./model";
 import { In } from "typeorm";
+import {TaskQueue} from './utils/queue';
+import * as poolAbi from "./abi/pool";
+import * as factoryAbi from "./abi/factory";
+import {FACTORY_ADDRESS} from './utils/constants';
 
-type Task = () => Promise<void>;
-type TaskQueue = {
-  Pool: Task[],
-  Tx: Task[],
-  Mint: Task[],
-  Burn: Task[],
-  Swap: Task[],
-  Collect: Task[],
-  Flash: Task[],
-};
 type MappingContext = ProcessorContext<StoreWithCache> & { queue: TaskQueue };
 
-let pools: Set<string> | undefined
+let isPoolsInitialized = false
 
 processor.run(new TypeormDatabaseWithCache({supportHotBlocks: true}), async (ctx) => {
-  if (pools === undefined) {
-    pools = await initializePools(ctx);
-    ctx.store.flush();
+  if (!isPoolsInitialized) {
+    await initializePools(ctx);
+    await ctx.store.flush();
+
+    isPoolsInitialized = true
   }
 
   const mctx: MappingContext = {
     ...ctx,
-    queue: {
-      Pool: [],
-      Tx: [],
-      Mint: [],
-      Burn: [],
-      Swap: [],
-      Collect: [],
-      Flash: [],    
-    }
+    queue: new TaskQueue()
   };
 
-  await processFactoryData(mctx, ctx.blocks, pools);
-  await processPairsData(mctx, ctx.blocks, pools);
+  // await processFactoryData(mctx, ctx.blocks);
+  // await processPairsData(mctx, ctx.blocks);
   //await processPositions(mctx, ctx.blocks);
 
-  await Promise.all(mctx.queue.Pool.map(t => t()));
-  await Promise.all(mctx.queue.Tx.map(t => t()));
-  await Promise.all(mctx.queue.Mint.map(t => t()));
-  await Promise.all(mctx.queue.Burn.map(t => t()));
-  await Promise.all(mctx.queue.Swap.map(t => t()));
-  await Promise.all(mctx.queue.Collect.map(t => t()));
-  await Promise.all(mctx.queue.Flash.map(t => t()));
+  for (let block of mctx.blocks) {
+    for (let log of block.logs) {
+      if (log.address === FACTORY_ADDRESS && log.topics[0] === factoryAbi.events.PoolCreated.topic) {
+        handlePoolCreated(mctx, log)
+      } else {
+        switch (log.topics[0]) {
+          case poolAbi.events.Initialize.topic:
+            handleInitialize(mctx, log);
+            break;
+          case poolAbi.events.Burn.topic:
+            handleBurn(mctx, log);
+            break;
+          case poolAbi.events.Mint.topic:
+            handleMint(mctx, log);
+            break;
+          case poolAbi.events.Swap.topic:
+            handleSwap(mctx, log);
+            break;
+        }
+      }
+    }
+  }
+
+  await mctx.queue.run()
 
   console.log('===== END OF THE BATCH =====')
 });
