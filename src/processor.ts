@@ -1,5 +1,4 @@
 import fs from 'fs'
-import { lookupArchive } from "@subsquid/archive-registry";
 import {
   FACTORY_ADDRESS,
   FACTORY_DEPLOYED_AT,
@@ -58,10 +57,10 @@ export const processor = new EvmBatchProcessor()
   .addLog({
     address: [POSITIONS_ADDRESS],
     topic0: [
-//      positionsAbi.events.IncreaseLiquidity.topic,
-//      positionsAbi.events.DecreaseLiquidity.topic,
+      positionsAbi.events.IncreaseLiquidity.topic,
+      positionsAbi.events.DecreaseLiquidity.topic,
       positionsAbi.events.Collect.topic,
-//      positionsAbi.events.Transfer.topic,
+      positionsAbi.events.Transfer.topic,
     ],
     transaction: true,
   })

@@ -2,7 +2,6 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, I
 import {Mint} from "./mint.model"
 import {Burn} from "./burn.model"
 import {Swap} from "./swap.model"
-import {Flash} from "./flash.model"
 import {Collect} from "./collect.model"
 
 @Entity_()
@@ -40,9 +39,6 @@ export class Tx {
 
     @OneToMany_(() => Swap, e => e.transaction)
     swaps!: Swap[]
-
-    @OneToMany_(() => Flash, e => e.transaction)
-    flashed!: Flash[]
 
     @OneToMany_(() => Collect, e => e.transaction)
     collects!: Collect[]

@@ -5,8 +5,7 @@
     "build": "rm -rf lib && tsc"
   },
   "dependencies": {
-    "@belopash/typeorm-store": "^1.4.0",
-    "@subsquid/archive-registry": "^3.3.2",
+    "@belopash/typeorm-store": "^1.4.2",
     "@subsquid/big-decimal": "^1.0.0",
     "@subsquid/evm-processor": "^1.18.0",
     "@subsquid/graphql-server": "^4.5.1",

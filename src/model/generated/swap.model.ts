@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, IntColumn as IntColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, Index as Index_, ManyToOne as ManyToOne_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, IntColumn as IntColumn_} from "@subsquid/typeorm-store"
 import {Tx} from "./tx.model"
 import {Pool} from "./pool.model"
 
@@ -12,12 +12,17 @@ export class Swap {
     id!: string
 
     @Index_()
+    @StringColumn_({nullable: false})
+    transactionHash!: string
+
+    @Index_()
     @ManyToOne_(() => Tx, {nullable: true})
     transaction!: Tx
 
     @DateTimeColumn_({nullable: false})
     timestamp!: Date
 
+    @Index_()
     @StringColumn_({nullable: false})
     poolAddress!: string
 

@@ -6,13 +6,14 @@ import {
 } from "./processor";
 import { handlePoolCreated } from "./mappings/factory";
 import { handleBurn, handleInitialize, handleMint, handleSwap } from "./mappings/core";
-//import { processPositions } from "./mappings/positionManager";
+import { handleIncreaseLiquidity, handleDecreaseLiquidity, handleCollect, handleTransfer } from "./mappings/positionManager";
 import { Pool } from "./model";
 import { In } from "typeorm";
 import {TaskQueue} from './utils/queue';
 import * as poolAbi from "./abi/pool";
 import * as factoryAbi from "./abi/factory";
-import {FACTORY_ADDRESS} from './utils/constants';
+import * as positionAbi from "./abi/NonfungiblePositionManager"
+import { FACTORY_ADDRESS, POSITIONS_ADDRESS } from "./utils/constants";
 
 type MappingContext = ProcessorContext<StoreWithCache> & { queue: TaskQueue };
 
@@ -31,15 +32,28 @@ processor.run(new TypeormDatabaseWithCache({supportHotBlocks: true}), async (ctx
     queue: new TaskQueue()
   };
 
-  // await processFactoryData(mctx, ctx.blocks);
-  // await processPairsData(mctx, ctx.blocks);
-  //await processPositions(mctx, ctx.blocks);
-
   for (let block of mctx.blocks) {
     for (let log of block.logs) {
       if (log.address === FACTORY_ADDRESS && log.topics[0] === factoryAbi.events.PoolCreated.topic) {
         handlePoolCreated(mctx, log)
-      } else {
+      }
+      else if (log.address === POSITIONS_ADDRESS) {
+        switch (log.topics[0]) {
+          case positionAbi.events.IncreaseLiquidity.topic:
+            handleIncreaseLiquidity(mctx, log);
+            break;
+          case positionAbi.events.DecreaseLiquidity.topic:
+            handleDecreaseLiquidity(mctx, log);
+            break;
+          case positionAbi.events.Collect.topic:
+            handleCollect(mctx, log);
+            break;
+          case positionAbi.events.Transfer.topic:
+            handleTransfer(mctx, log);
+            break;
+        }
+      }
+      else {
         switch (log.topics[0]) {
           case poolAbi.events.Initialize.topic:
             handleInitialize(mctx, log);
@@ -58,9 +72,7 @@ processor.run(new TypeormDatabaseWithCache({supportHotBlocks: true}), async (ctx
     }
   }
 
-  await mctx.queue.run()
-
-  console.log('===== END OF THE BATCH =====')
+  await mctx.queue.run();
 });
 
 async function initializePools(ctx: ProcessorContext<StoreWithCache>): Promise<Set<string>> {

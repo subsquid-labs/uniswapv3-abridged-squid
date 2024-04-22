@@ -1,10 +1,9 @@
 import * as factoryAbi from "../abi/factory";
 import { Pool } from "../model";
-import { FACTORY_ADDRESS } from "../utils/constants";
 
 import { StoreWithCache } from "@belopash/typeorm-store";
-import { ProcessorContext, BlockData, Block, Log } from "../processor";
-import {TaskQueue} from '../utils/queue';
+import { ProcessorContext, Log } from "../processor";
+import { TaskQueue } from "../utils/queue";
 
 type ContextWithPoolQueue = ProcessorContext<StoreWithCache> & { queue: TaskQueue };
 
@@ -12,7 +11,6 @@ export function handlePoolCreated(
   mctx: ContextWithPoolQueue,
   log: Log,
 ) {
-
   let {
     token0,
     token1,
@@ -22,17 +20,11 @@ export function handlePoolCreated(
   mctx.store.defer(Pool, poolAddressLowerCase);
 
   mctx.queue.add(async () => {
-    const pool = await mctx.store.getOrInsert(Pool, poolAddressLowerCase, createNewPool);
+    const pool = await mctx.store.getOrInsert(Pool, poolAddressLowerCase, id => new Pool({ id }));
     pool.createdAtBlockNumber = log.block.height;
     pool.createdAtTimestamp = new Date(log.block.timestamp);
     pool.token0Id = token0;
     pool.token1Id = token1;
     await mctx.store.upsert(pool);
-  })
-}
-
-function createNewPool(address: string): Pool {
-  return new Pool({
-    id: address
   })
 }

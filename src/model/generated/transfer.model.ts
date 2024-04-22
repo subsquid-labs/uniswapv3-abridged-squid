@@ -2,8 +2,8 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, S
 import {Tx} from "./tx.model"
 
 @Entity_()
-export class Collect {
-    constructor(props?: Partial<Collect>) {
+export class Transfer {
+    constructor(props?: Partial<Transfer>) {
         Object.assign(this, props)
     }
 
@@ -25,11 +25,8 @@ export class Collect {
     tokenId!: bigint
 
     @StringColumn_({nullable: false})
-    recipient!: string
+    from!: string
 
-    @BigIntColumn_({nullable: false})
-    amount0!: bigint
-
-    @BigIntColumn_({nullable: false})
-    amount1!: bigint
+    @StringColumn_({nullable: false})
+    to!: string
 }

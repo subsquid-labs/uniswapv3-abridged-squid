@@ -2,7 +2,6 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, D
 import {Mint} from "./mint.model"
 import {Burn} from "./burn.model"
 import {Swap} from "./swap.model"
-import {Collect} from "./collect.model"
 
 @Entity_()
 export class Pool {
@@ -39,7 +38,4 @@ export class Pool {
 
     @OneToMany_(() => Swap, e => e.pool)
     swaps!: Swap[]
-
-    @OneToMany_(() => Collect, e => e.pool)
-    collects!: Collect[]
 }

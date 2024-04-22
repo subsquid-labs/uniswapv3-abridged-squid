@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, StringColumn as StringColumn_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, IntColumn as IntColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, Index as Index_, ManyToOne as ManyToOne_, DateTimeColumn as DateTimeColumn_, BigIntColumn as BigIntColumn_, IntColumn as IntColumn_} from "@subsquid/typeorm-store"
 import {Tx} from "./tx.model"
 import {Pool} from "./pool.model"
 
@@ -12,9 +12,14 @@ export class Burn {
     id!: string
 
     @Index_()
+    @StringColumn_({nullable: false})
+    transactionHash!: string
+
+    @Index_()
     @ManyToOne_(() => Tx, {nullable: true})
     transaction!: Tx
 
+    @Index_()
     @StringColumn_({nullable: false})
     poolAddress!: string
 

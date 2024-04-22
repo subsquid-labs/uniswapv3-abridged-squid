@@ -1,27 +1,4 @@
-type Factory @entity {
-  # factory address
-  id: ID!
-}
-
-type Pool @entity {
-  # pool address
-  id: ID!
-  # creation
-  createdAtTimestamp: DateTime
-  createdAtBlockNumber: Int
-  # token0
-  token0Id: String
-  # token1
-  token1Id: String
-  # initial state
-  initialTick: Int
-  initialSqrtPriceX96: BigInt
-  # derived fields
-  mints: [Mint!]! @derivedFrom(field: "pool")
-  burns: [Burn!]! @derivedFrom(field: "pool")
-  swaps: [Swap!]! @derivedFrom(field: "pool")
-  collects: [Collect!]! @derivedFrom(field: "pool")
-}
+### Common ###
 
 type Tx @entity {
   # txn hash
@@ -40,19 +17,41 @@ type Tx @entity {
   mints: [Mint]! @derivedFrom(field: "transaction")
   burns: [Burn]! @derivedFrom(field: "transaction")
   swaps: [Swap]! @derivedFrom(field: "transaction")
-  flashed: [Flash]! @derivedFrom(field: "transaction")
   collects: [Collect]! @derivedFrom(field: "transaction")
 }
 
-type Mint @entity {
-  # parent transaction hash
+### From factory events ###
+
+type Pool @entity {
+  # pool address
   id: ID!
-  # which txn the mint was included in
+  # creation
+  createdAtTimestamp: DateTime
+  createdAtBlockNumber: Int
+  # token0
+  token0Id: String
+  # token1
+  token1Id: String
+  # initial state
+  initialTick: Int
+  initialSqrtPriceX96: BigInt
+  # derived fields
+  mints: [Mint!]! @derivedFrom(field: "pool")
+  burns: [Burn!]! @derivedFrom(field: "pool")
+  swaps: [Swap!]! @derivedFrom(field: "pool")
+}
+
+### From pool events ###
+
+type Mint @entity {
+  id: ID!
+  # txn the mint was included in
+  transactionHash: String! @index
   transaction: Tx!
   # time of txn
   timestamp: DateTime!
   # pool position is within
-  poolAddress: String!
+  poolAddress: String! @index
   pool: Pool!
   # owner of position where liquidity minted to
   owner: String!
@@ -75,12 +74,12 @@ type Mint @entity {
 }
 
 type Burn @entity {
-  # parent transaction hash
   id: ID!
   # txn burn was included in
+  transactionHash: String! @index
   transaction: Tx!
   # pool position is within
-  poolAddress: String!
+  poolAddress: String! @index
   pool: Pool!
   # need this to pull recent txns for specific token or pool
   timestamp: DateTime!
@@ -103,14 +102,14 @@ type Burn @entity {
 }
 
 type Swap @entity {
-  # parent transaction hash
   id: ID!
-  # pointer to transaction
+  # txn swap was included in
+  transactionHash: String! @index
   transaction: Tx!
   # timestamp of transaction
   timestamp: DateTime!
   # pool swap occured within
-  poolAddress: String!
+  poolAddress: String! @index
   pool: Pool!
   # sender of the swap
   sender: String!
@@ -132,54 +131,66 @@ type Swap @entity {
   logIndex: Int
 }
 
-type Collect @entity {
-  # transaction hash + "#" + index in collect Transaction array
+### From positions manager events ###
+
+type IncreaseLiquidity @entity {
   id: ID!
-  # pointer to txn
-  transactionHash: String!
+  # pointer to the tx
+  transactionHash: String! @index
   transaction: Tx!
-  # timestamp of event
+  # timestamp of the event
   timestamp: DateTime!
-  # pool collect occured within
-  poolAddress: String!
-  pool: Pool!
-  # owner of position collect was performed on
-  owner: String
-  # amount of token0 collected
-  amount0: Float!
-  # amount of token1 collected
-  amount1: Float!
-  # lower tick of position
-  tickLower: Int!
-  # uppper tick of position
-  tickUpper: Int!
-  # index within the txn
-  logIndex: Int
+  # id of the position nft
+  tokenId: BigInt!
+  # liquidity amt
+  liquidity: BigInt!
+  # individual token amts
+  amount0: BigInt!
+  amount1: BigInt!
 }
 
-type Flash @entity {
-  # transaction hash + "-" + index in collect Transaction array
+type DecreaseLiquidity @entity {
   id: ID!
-  # pointer to txn
+  # pointer to the tx
+  transactionHash: String! @index
   transaction: Tx!
-  transactionHash: String!
-  # timestamp of event
+  # timestamp of the event
   timestamp: DateTime!
-  # pool collect occured within
-  poolAddress: String!
-  pool: Pool!
-  # sender of the flash
-  sender: String!
-  # recipient of the flash
+  # id of the position nft
+  tokenId: BigInt!
+  # liquidity amt
+  liquidity: BigInt!
+  # individual token amts
+  amount0: BigInt!
+  amount1: BigInt!
+}
+
+type Collect @entity {
+  id: ID!
+  # pointer to the tx
+  transactionHash: String! @index
+  transaction: Tx!
+  # timestamp of the event
+  timestamp: DateTime!
+  # id of the position nft
+  tokenId: BigInt!
+  # recipient
   recipient: String!
-  # amount of token0 flashed
-  amount0: Float!
-  # amount of token1 flashed
-  amount1: Float!
-  # amount token0 paid for flash
-  amount0Paid: Float!
-  # amount token1 paid for flash
-  amount1Paid: Float!
-  # index within the txn
-  logIndex: Int
+  # individual token amts
+  amount0: BigInt!
+  amount1: BigInt!
+}
+
+type Transfer @entity {
+  id: ID!
+  # pointer to the tx
+  transactionHash: String! @index
+  transaction: Tx!
+  # timestamp of the event
+  timestamp: DateTime!
+  # id of the position nft
+  tokenId: BigInt!
+  # the itinerary
+  from: String!
+  to: String!
 }

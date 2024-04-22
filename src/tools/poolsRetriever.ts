@@ -1,5 +1,4 @@
 import assert from 'assert'
-import {lookupArchive} from '@subsquid/archive-registry'
 import {EvmBatchProcessor} from '@subsquid/evm-processor'
 import {Database, LocalDest} from '@subsquid/file-store'
 import * as factoryAbi from '../abi/factory'
