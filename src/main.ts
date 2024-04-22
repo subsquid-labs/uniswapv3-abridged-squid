@@ -47,6 +47,15 @@ processor.run(new TypeormDatabaseWithCache({supportHotBlocks: true}), async (ctx
   await processPairsData(mctx, ctx.blocks, pools);
   //await processPositions(mctx, ctx.blocks);
 
+	for (let t of mctx.queue.Pool) { await t(); };
+	for (let t of mctx.queue.Tx) { await t(); };
+	for (let t of mctx.queue.Mint) { await t(); };
+	for (let t of mctx.queue.Burn) { await t(); };
+	for (let t of mctx.queue.Swap) { await t(); };
+	for (let t of mctx.queue.Collect) { await t(); };
+	for (let t of mctx.queue.Flash) { await t(); };
+
+/*
   await Promise.all(mctx.queue.Pool.map(t => t()));
   await Promise.all(mctx.queue.Tx.map(t => t()));
   await Promise.all(mctx.queue.Mint.map(t => t()));
@@ -54,7 +63,7 @@ processor.run(new TypeormDatabaseWithCache({supportHotBlocks: true}), async (ctx
   await Promise.all(mctx.queue.Swap.map(t => t()));
   await Promise.all(mctx.queue.Collect.map(t => t()));
   await Promise.all(mctx.queue.Flash.map(t => t()));
-
+*/
   console.log('===== END OF THE BATCH =====')
 });
 
