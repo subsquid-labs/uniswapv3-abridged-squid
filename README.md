@@ -2,7 +2,7 @@
 
 # Simplified Uniswap V3 indexer with caching store
 
-This [squid](https://docs.subsquid.io/sdk/overview/) indexer keeps track of a variety of events emitted by Uniswap V3 ([the app](https://app.uniswap.org)) smart contracts on Ethereum. It is an abridged and modernized version of the full-featured [`uniswapv3-squid`](https://github.com/subsquid-labs/uniswapv3-squid), showcasing the new squid architecture based on [`@belopash/typeorm-store`](https://github.com/belopash/squid-typeorm-store). It employs automated [batching](https://docs.subsquid.io/sdk/resources/basics/batch-processing/) and caching to reduce DB ussage (see [Optimizations](#optimizations)).
+This [squid](https://docs.subsquid.io/sdk/overview/) indexer keeps track of a variety of events emitted by Uniswap V3 smart contracts (used by [the app](https://app.uniswap.org)) on Ethereum. It is an abridged and modernized version of the full-featured [`uniswapv3-squid`](https://github.com/subsquid-labs/uniswapv3-squid), showcasing the new squid architecture based on [`@belopash/typeorm-store`](https://github.com/belopash/squid-typeorm-store). It employs [two-pass indexing](https://docs.subsquid.io/sdk/resources/evm/factory-contracts/#two-pass-indexing-for-factory-contracts), automated [batching](https://docs.subsquid.io/sdk/resources/basics/batch-processing/) and caching (see [Optimizations](#optimizations)).
 
 ## Quickstart
 
