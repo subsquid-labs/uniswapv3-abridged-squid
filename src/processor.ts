@@ -1,3 +1,4 @@
+import {assertNotNull} from "@subsquid/util-internal";
 import fs from 'fs'
 import {
   FACTORY_ADDRESS,
@@ -24,7 +25,10 @@ export const preloadedPoolsMetadata = JSON.parse(fs.readFileSync("./assets/pools
 export const processor = new EvmBatchProcessor()
   .setGateway("https://v2.archive.subsquid.io/network/ethereum-mainnet")
   .setRpcEndpoint({
-    url: "https://rpc.ankr.com/eth/",
+    url: assertNotNull(
+      process.env.RPC_ETH_HTTP,
+      "Required env variable RPC_ETH_HTTP is missing"
+    ),
     rateLimit: 10,
   })
   .setFinalityConfirmation(75)
